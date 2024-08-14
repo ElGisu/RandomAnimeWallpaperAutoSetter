@@ -9,6 +9,7 @@ Este script en Python descarga imágenes de anime aleatorias desde la API de wai
 2. Ejecuta el siguiente comando para instalar las bibliotecas necesarias:
    ```bash
    pip install requests pillow
+3. Reemplaza "xxxxxxxxxxxxxx" en el código con la ruta del directorio donde deseas guardar las imágenes originales. Por ejemplo, puedes usar una ruta como C:\Users\tu_usuario\Pictures\AnimeWallpapers.
 
  
 #### Ejecuta el script:
