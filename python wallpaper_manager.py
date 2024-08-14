@@ -8,7 +8,7 @@ import time
 
 def download_and_set_wallpaper():
     # Directorio donde se guardarán las imágenes
-    save_directory = r"C:\Users\jcevi\OneDrive\Desktop\Nueva carpeta (2)"
+    save_directory = r"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     original_images_directory = os.path.join(save_directory, "originales")
     if not os.path.exists(save_directory):
         os.makedirs(save_directory)
