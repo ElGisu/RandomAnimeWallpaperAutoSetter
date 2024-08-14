@@ -2,12 +2,17 @@ AnimeWallpaperManager
 
 Este script en Python descarga imágenes de anime aleatorias desde la API de waifu.pics, mejora la calidad aplicando desenfoque a imágenes verticales, y las configura automáticamente como fondo de pantalla en Windows. Además, guarda las imágenes originales sin modificar para uso posterior.
 
-Cómo usar:
-Instala las dependencias:
+# AnimeWallpaperManager
 
-Asegúrate de tener Python instalado.
-Ejecuta el siguiente comando para instalar las bibliotecas necesarias:
-pip install requests pillow
+Este script en Python descarga imágenes de anime aleatorias desde la API de waifu.pics, mejora la calidad aplicando desenfoque a imágenes verticales, y las configura automáticamente como fondo de pantalla en Windows. Además, guarda las imágenes originales sin modificar para uso posterior.
+
+## Cómo usar:
+
+### Instala las dependencias:
+1. Asegúrate de tener Python instalado.
+2. Ejecuta el siguiente comando para instalar las bibliotecas necesarias:
+   ```bash
+   pip install requests pillow
 
  
 Ejecuta el script:
