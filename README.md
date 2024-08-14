@@ -17,4 +17,4 @@ python wallpaper_manager.py
 2. El script descargará una nueva imagen cada 5 minutos y la aplicará automáticamente como fondo de pantalla.
 #### Notas:
 1. Guardar las imágenes: Las imágenes originales se guardarán en la carpeta originales, dentro del directorio especificado en el script.
-Inicio automático: Para que el script se ejecute automáticamente al iniciar sesión, puedes agregar un acceso directo al archivo .py en la carpeta de inicio de Windows.
+2. Inicio automático: Para que el script se ejecute automáticamente al iniciar sesión, puedes agregar un acceso directo al archivo .py en la carpeta de inicio de Windows.
