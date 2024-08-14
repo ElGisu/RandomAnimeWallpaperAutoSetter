@@ -1,4 +1,4 @@
-import requests
+mport requests
 from PIL import Image, ImageFilter
 from io import BytesIO
 import ctypes
@@ -7,74 +7,78 @@ import hashlib
 import time
 
 def download_and_set_wallpaper():
-    # Directorio donde se guardarán las imágenes
-    save_directory = r"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    original_images_directory = os.path.join(save_directory, "originales")
+    # Directorio donde se guardarán las imágenes originales
+    save_directory = r"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     if not os.path.exists(save_directory):
         os.makedirs(save_directory)
-    if not os.path.exists(original_images_directory):
-        os.makedirs(original_images_directory)
 
-    # URL de la API que devuelve una imagen de anime aleatoria
-    url = "https://api.waifu.pics/sfw/waifu"
+    # Archivo para almacenar los hashes de las imágenes ya descargadas
+    hash_file_path = os.path.join(save_directory, "image_hashes.txt")
+    
+    # Cargar los hashes existentes
+    if os.path.exists(hash_file_path):
+        with open(hash_file_path, 'r') as f:
+            downloaded_hashes = set(f.read().splitlines())
+    else:
+        downloaded_hashes = set()
 
-    # Realiza la solicitud a la API
-    response = requests.get(url)
-    data = response.json()
+    while True:
+        # URL de la API que devuelve una imagen de anime aleatoria
+        url = "https://api.waifu.pics/sfw/waifu"
 
-    # Obtiene la URL de la imagen
-    image_url = data['url']
+        # Realiza la solicitud a la API
+        response = requests.get(url)
+        data = response.json()
 
-    # Descarga la imagen
-    image_response = requests.get(image_url)
-    img = Image.open(BytesIO(image_response.content))
+        # Obtiene la URL de la imagen
+        image_url = data['url']
 
-    # Genera un hash para verificar si la imagen ya existe
-    img_hash = hashlib.md5(img.tobytes()).hexdigest()
-    existing_images = [f for f in os.listdir(save_directory) if f.endswith('.png')]
-    existing_hashes = {os.path.splitext(f)[0]: f for f in existing_images}
+        # Descarga la imagen
+        image_response = requests.get(image_url)
+        img = Image.open(BytesIO(image_response.content))
 
-    # Verifica si la imagen ya fue guardada anteriormente
-    if img_hash not in existing_hashes:
-        # Guardar la imagen original sin el efecto de desenfoque
-        original_image_path = os.path.join(original_images_directory, f'{img_hash}.png')
+        # Genera un hash para el nombre del archivo
+        img_hash = hashlib.md5(img.tobytes()).hexdigest()
+
+        # Si la imagen ya ha sido descargada, omitirla y continuar
+        if img_hash in downloaded_hashes:
+            print("Imagen repetida, descargando otra...")
+            continue
+
+        # Agregar el hash al conjunto de hashes descargados
+        downloaded_hashes.add(img_hash)
+        with open(hash_file_path, 'a') as f:
+            f.write(f"{img_hash}\n")
+
+        # Guarda la imagen original
+        original_image_path = os.path.join(save_directory, f'{img_hash}.png')
         img.save(original_image_path)
-        print(f"Imagen original guardada en: {original_image_path}")
 
-        # Obtén la resolución de la pantalla
+        # Verifica la relación de aspecto para determinar si aplicar desenfoque
         screen_width = ctypes.windll.user32.GetSystemMetrics(0)
         screen_height = ctypes.windll.user32.GetSystemMetrics(1)
+        img_aspect_ratio = img.width / img.height
+        screen_aspect_ratio = screen_width / screen_height
 
-        # Crear una copia de la imagen desenfocada para usar como fondo completo
-        img_blurred = img.copy()
+        if img_aspect_ratio <= screen_aspect_ratio:
+            # La imagen es vertical o cercana a la proporción de la pantalla, aplica desenfoque
+            img_blurred = img.copy()
+            img_blurred = img_blurred.resize((screen_width, screen_height), Image.LANCZOS)
+            img_blurred = img_blurred.filter(ImageFilter.GaussianBlur(radius=20))
+            img.thumbnail((screen_width, screen_height), Image.LANCZOS)
+            offset = ((screen_width - img.width) // 2, (screen_height - img.height) // 2)
+            img_blurred.paste(img, offset)
 
-        # Redimensionar la imagen desenfocada para llenar la pantalla
-        img_blurred = img_blurred.resize((screen_width, screen_height), Image.LANCZOS)
-        img_blurred = img_blurred.filter(ImageFilter.GaussianBlur(radius=20))
+            # Establece la imagen desenfocada como fondo de pantalla
+            blurred_image_path = os.path.join(save_directory, f'{img_hash}_blurred.png')
+            img_blurred.save(blurred_image_path)
+            ctypes.windll.user32.SystemParametersInfoW(20, 0, blurred_image_path, 0)
+        else:
+            # La imagen es horizontal o suficientemente amplia, se establece tal cual
+            ctypes.windll.user32.SystemParametersInfoW(20, 0, original_image_path, 0)
 
-        # Redimensiona la imagen original manteniendo la proporción
-        img.thumbnail((screen_width, screen_height), Image.LANCZOS)
-
-        # Pegar la imagen original sobre la versión desenfocada, centrada
-        offset = ((screen_width - img.width) // 2, (screen_height - img.height) // 2)
-        img_blurred.paste(img, offset)
-
-        # Guarda la imagen final con el desenfoque aplicado
-        final_image_path = os.path.join(save_directory, f'{img_hash}.png')
-        img_blurred.save(final_image_path)
-
-        # Configura la imagen combinada como fondo de pantalla
-        ctypes.windll.user32.SystemParametersInfoW(20, 0, final_image_path, 0)
-        print("Imagen con fondo desenfocado configurada como fondo de pantalla.")
-
-        # Elimina las imágenes más antiguas si se supera el límite de 50
-        if len(existing_images) >= 50:
-            oldest_image = min(existing_images, key=lambda x: os.path.getctime(os.path.join(save_directory, x)))
-            os.remove(os.path.join(save_directory, oldest_image))
-            print(f"Eliminada imagen antigua: {oldest_image}")
-    else:
-        print("La imagen ya existe y no se guardará nuevamente.")
-        return
+        print("Imagen configurada como fondo de pantalla.")
+        break
 
 while True:
     download_and_set_wallpaper()
