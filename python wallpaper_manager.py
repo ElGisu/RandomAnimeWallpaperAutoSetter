@@ -1,4 +1,4 @@
-mport requests
+import requests
 from PIL import Image, ImageFilter
 from io import BytesIO
 import ctypes
